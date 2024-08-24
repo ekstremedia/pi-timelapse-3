@@ -6,7 +6,7 @@ image_prefix: "image"
 camera_settings:
   name: "Kringelen TEST"
   main_size: [3840, 2160]
-  lores_size: [640, 480]
+  lores_size: [1000, 1000]
   awb_enable: False
   awb_mode: 'Daylight'
   colour_gains_day: [2.2, 1.9]  # Daytime gains
@@ -15,12 +15,13 @@ camera_settings:
   focus_mode: 'manual'
   lens_position: 0.0  # 0.0 = infinity, 1 sharp, 10 unsharp
   hdr: true
-  image_quality: 90
+  image_quality: 60 # JPEG quality level, where 0 is the worst quality and 95 is best.
+  compress_level: 6 # PNG compression level, where 0 gives no compression, 1 is the fastest that actually does any compression, and 9 is the slowest.
   light_threshold: 50  # Adjust as needed for day/night transition
   iso_day: 1
   iso_night: 8
   shutter_speed_day: 0  # 0 means auto
-  shutter_speed_night: 2000000  # In microseconds (1 second)
+  shutter_speed_night: 20000000  # In microseconds (1 second)
   display: 'main'
 
 image_output:
@@ -30,12 +31,24 @@ image_output:
   status_file: '/var/www/html/status.jpg'
   image_extension: "jpg"
 
+video_output:
+  root_folder: '/var/www/html/videos/'
+  folder_structure: '%Y/%m/'           # 2023/06/
+  filename_prefix: 'timelapse_'
+  video_width: 1920
+  video_height: 1160
+  framerate: 25
+  bitrate: 5000000
+  video_format: mp4
+  constant_rate_factor: 23
+
 overlay:
   enabled: False
 
 
 logging:
     capture_image: True
+    log_directory: "logs"
 
 debug:
   enabled: False

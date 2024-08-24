@@ -52,6 +52,13 @@ def capture_image(config, iso, shutter_speed, daylight, logger=None):
         logger (logging.Logger, optional): Logger instance for logging events.
     """
     picam2 = Picamera2()
+    
+    quality = config['camera_settings']['image_quality']
+    compression = config['camera_settings']['compress_level']
+    
+    picam2.options["quality"] = quality
+    picam2.options["compress_level"] = compression
+
 
     # Determine focus mode and lens position based on config
     focus_mode = libcamera.controls.AfModeEnum.Manual if config['camera_settings']['focus_mode'] == 'manual' else libcamera.controls.AfModeEnum.Auto
@@ -92,8 +99,8 @@ def capture_image(config, iso, shutter_speed, daylight, logger=None):
     picam2.configure(camera_config)
 
     # Start the camera and capture the image
-    picam2.start()
     time.sleep(2)  # Allow camera to adjust
+    picam2.start()
 
     now = datetime.now()
     dir_name = os.path.join(config['image_output']['root_folder'], now.strftime(config['image_output']['folder_structure']))
@@ -103,11 +110,21 @@ def capture_image(config, iso, shutter_speed, daylight, logger=None):
     picam2.capture_file(file_name)
     picam2.stop()
 
-    log_entry = f"Captured image {file_name} with settings: ISO={iso}, Shutter={shutter_speed}, Daylight={daylight}, Config={camera_config['controls']}"
+    # Log the capture
+    log_entry = f"Captured image {file_name} with settings: ISO={iso}, Shutter={shutter_speed}, Quality={quality}, Compression={compression} Daylight={daylight}, Config={camera_config['controls']}"
     print(log_entry)
-
     if logger:
         log_message(logger, log_entry)
+
+    # Create or update symlink to the latest image
+    symlink_path = config['image_output']['status_file']
+    if os.path.islink(symlink_path) or os.path.exists(symlink_path):
+        os.remove(symlink_path)
+    os.symlink(file_name, symlink_path)
+    print(f"Symlink updated: {symlink_path} -> {file_name}")
+
+    if logger:
+        log_message(logger, f"Symlink updated: {symlink_path} -> {file_name}")
 
     print(f"Image captured and saved to {file_name}")
 
@@ -130,7 +147,7 @@ if __name__ == "__main__":
 
     if debug_mode and debug_light_level is not None:
         light_level = debug_light_level
-        iso, shutter_speed, _ = calculate_iso_and_shutter(light_level)
+        iso, shutter_speed, _ = calculate_iso_and_shutter(light_level, config)
         log_message(logger, f"Debug mode enabled. Overriding light level to {light_level}")
     else:
         # Run the light evaluation script

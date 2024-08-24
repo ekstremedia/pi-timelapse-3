@@ -2,7 +2,7 @@ import os
 import yaml
 
 # Configuration parameters
-DAYLIGHT_THRESHOLD = 13  # Light level threshold for daylight mode (auto settings)
+DAYLIGHT_THRESHOLD = 30  # Light level threshold for daylight mode (auto settings)
 NIGHT_THRESHOLD = 1      # Light level below which to use maximum ISO and slowest shutter speed
 SMOOTHING_START = 70       # Light level at which to start smoothing the transition to daylight settings
 
