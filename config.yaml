@@ -15,7 +15,7 @@ camera_settings:
   focus_mode: 'manual'
   lens_position: 0.0  # 0.0 = infinity, 1 sharp, 10 unsharp
   hdr: true
-  image_quality: 60 # JPEG quality level, where 0 is the worst quality and 95 is best.
+  image_quality: 80 # JPEG quality level, where 0 is the worst quality and 95 is best.
   compress_level: 6 # PNG compression level, where 0 gives no compression, 1 is the fastest that actually does any compression, and 9 is the slowest.
   light_threshold: 50  # Adjust as needed for day/night transition
   iso_day: 1
