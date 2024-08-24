@@ -2,5 +2,41 @@
 
 output_directory: "/var/www/html/timelapse_images"
 image_prefix: "image"
-image_extension: "jpg"
 
+camera_settings:
+  name: "Kringelen TEST"
+  main_size: [3840, 2160]
+  lores_size: [640, 480]
+  awb_enable: False
+  awb_mode: 'Daylight'
+  colour_gains_day: [2.2, 1.9]  # Daytime gains
+  colour_gains_night: [1.4, 3.1]  # Nighttime gains
+  interval: 30  # Interval in seconds
+  focus_mode: 'manual'
+  lens_position: 0.0  # 0.0 = infinity, 1 sharp, 10 unsharp
+  hdr: true
+  image_quality: 90
+  light_threshold: 50  # Adjust as needed for day/night transition
+  iso_day: 1
+  iso_night: 8
+  shutter_speed_day: 0  # 0 means auto
+  shutter_speed_night: 2000000  # In microseconds (1 second)
+  display: 'main'
+
+image_output:
+  root_folder: '/var/www/html/images/'
+  folder_structure: '%Y/%m/%d/'
+  filename_prefix: 'kringelen_'
+  status_file: '/var/www/html/status.jpg'
+  image_extension: "jpg"
+
+overlay:
+  enabled: False
+
+
+logging:
+    capture_image: True
+
+debug:
+  enabled: False
+  light_level: 1  # Override light level for testing
