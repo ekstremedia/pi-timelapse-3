@@ -4,3 +4,4 @@ temp/
 data/
 overlay/output.jpg
 **/__pycache__/
+config.yaml
