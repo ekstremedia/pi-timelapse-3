@@ -35,7 +35,8 @@ if __name__ == "__main__":
         # Start capturing images at specified intervals
         log_message(logger, f"Starting a new capture cycle.")
         try:
-            subprocess.run(['python3', 'capture_image.py'], check=True)
+            script_path = os.path.join(os.path.dirname(__file__), 'capture_image.py')
+            subprocess.run(['python3', script_path], check=True)
         except subprocess.CalledProcessError as e:
             log_message(logger, f"Error during image capture: {e}")
         

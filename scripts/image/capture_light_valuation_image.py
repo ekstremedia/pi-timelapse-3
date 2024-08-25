@@ -1,4 +1,5 @@
 import os
+import time
 import yaml
 from picamera2 import Picamera2
 import libcamera
@@ -53,6 +54,7 @@ def capture_light_valuation_image():
     picam2.start()
     picam2.capture_file(output_path)
     picam2.stop()
+    time.sleep(2)
 
     print(f"Light valuation image saved to {output_path}")
 

@@ -6,7 +6,7 @@ image_prefix: "image"
 camera_settings:
   name: "Kringelen TEST"
   main_size: [3840, 2160]
-  lores_size: [1000, 1000]
+  lores_size: [1000, 500]
   awb_enable: False
   awb_mode: 'Daylight'
   colour_gains_day: [2.2, 1.9]  # Daytime gains

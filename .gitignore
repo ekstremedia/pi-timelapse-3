@@ -2,3 +2,5 @@ venv/
 logs/
 temp/
 data/
+overlay/output.jpg
+**/__pycache__/
