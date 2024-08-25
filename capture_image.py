@@ -51,6 +51,7 @@ def capture_image(config, iso, shutter_speed, daylight, logger=None):
         daylight (bool): Whether it's daylight or not.
         logger (logging.Logger, optional): Logger instance for logging events.
     """
+        
     picam2 = Picamera2()
     
     quality = config['camera_settings']['image_quality']
@@ -66,6 +67,13 @@ def capture_image(config, iso, shutter_speed, daylight, logger=None):
 
     if daylight:
         # Daytime configuration
+        # Enable or disable HDR based on config
+        # This must be done before Picamera2 is ran
+        # Only works with v3 cameras
+        if config['camera_settings']['hdr']:
+            os.system("v4l2-ctl --set-ctrl wide_dynamic_range=1 -d /dev/v4l-subdev0")
+        else:
+            os.system("v4l2-ctl --set-ctrl wide_dynamic_range=0 -d /dev/v4l-subdev0")            
         camera_config = picam2.create_still_configuration(
             main={"size": tuple(config['camera_settings']['main_size'])},
             lores={"size": tuple(config['camera_settings']['lores_size'])},
@@ -81,6 +89,8 @@ def capture_image(config, iso, shutter_speed, daylight, logger=None):
         )
     else:
         # Nighttime configuration
+        # HDR off at night
+        os.system("v4l2-ctl --set-ctrl wide_dynamic_range=0 -d /dev/v4l-subdev0") 
         camera_config = picam2.create_still_configuration(
             main={"size": tuple(config['camera_settings']['main_size'])},
             lores={"size": tuple(config['camera_settings']['lores_size'])},
