@@ -96,13 +96,13 @@ def overlay_image_with_text(input_image_path, output_image_path=None, text=None,
     draw.text(date_position, full_date, font=datefont, fill=TEXT_COLOR)
 
     # Draw a rectangle behind the overlay text for better visibility (for debugging)
-    overlay_data = {
-        "ISO": "100",
-        "Shutter": "1/125",
-        "Quality": "High",
-        "Compression": "Low",
-        "Daylight": "True"
-    }    
+    # overlay_data = {
+    #     "ISO": "100",
+    #     "Shutter": "1/125",
+    #     "Quality": "High",
+    #     "Compression": "Low",
+    #     "Daylight": "True"
+    # }    
     
     if overlay_data:
         light_level = load_light_level()
