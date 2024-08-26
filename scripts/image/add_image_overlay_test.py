@@ -1,3 +1,4 @@
+import json
 from PIL import Image, ImageDraw, ImageFont
 import os
 import yaml
@@ -15,6 +16,24 @@ TEXT_COLOR = (255, 255, 255)  # White text, no alpha channel for JPEG
 TIME_FONT_SIZE = 70  # Font size for the time
 CONFIG_PATH = os.path.join(os.path.dirname(__file__), '../../config.yaml')
 QUALITY = 70
+LAST_MEASUREMENT_PATH = os.path.join(os.path.dirname(__file__), '../../temp/last_measurement.json')
+
+def load_light_level(last_measurement_path=LAST_MEASUREMENT_PATH):
+    """
+    Loads the light level from the last_measurement.json file.
+
+    Parameters:
+        last_measurement_path (str): Path to the last_measurement.json file.
+
+    Returns:
+        float: The light level rounded to one decimal place.
+    """
+    if os.path.exists(last_measurement_path):
+        with open(last_measurement_path, 'r') as file:
+            data = json.load(file)
+        return round(data.get("light_level", 0), 1)
+    else:
+        return None
 
 def load_camera_name(config_path=CONFIG_PATH):
     """
@@ -30,7 +49,7 @@ def load_camera_name(config_path=CONFIG_PATH):
         config = yaml.safe_load(file)
     return config.get('camera_settings', {}).get('name', "Camera Name")
 
-def overlay_image_with_text(input_image_path, output_image_path=None, text=None, quality=QUALITY):
+def overlay_image_with_text(input_image_path, output_image_path=None, text=None, quality=QUALITY, overlay_data=None):
     """
     Overlays an image with an overlay image, adds the camera name, and the full date in Norwegian.
 
@@ -39,6 +58,7 @@ def overlay_image_with_text(input_image_path, output_image_path=None, text=None,
         output_image_path (str, optional): Path to save the output image. If None, the input image will be overwritten.
         text (str): Camera name to add to the image.
         quality (int): Quality of the output image (applicable for JPEG format).
+        overlay_data (dict): Additional data to be displayed on the image.
     """
     # Load camera name if text is not provided
     if text is None:
@@ -74,6 +94,30 @@ def overlay_image_with_text(input_image_path, output_image_path=None, text=None,
     date_bbox = draw.textbbox((0, 0), full_date, font=datefont)
     date_position = ((base_image.width - date_bbox[2]) // 2, text_position[1] + text_bbox[3] + 10)  # 10 pixels below the camera name
     draw.text(date_position, full_date, font=datefont, fill=TEXT_COLOR)
+
+    # Draw a rectangle behind the overlay text for better visibility (for debugging)
+    overlay_data = {
+        "ISO": "100",
+        "Shutter": "1/125",
+        "Quality": "High",
+        "Compression": "Low",
+        "Daylight": "True"
+    }    
+    
+    if overlay_data:
+        light_level = load_light_level()
+        overlay_font = ImageFont.truetype(FONT_PATH, 30)
+        overlay_text = f"ISO: {overlay_data.get('ISO', 'N/A')} Shutter: {overlay_data.get('Shutter', 'N/A')} "  \
+                    f"Light: {light_level} " \
+                    f"Daylight: {overlay_data.get('Daylight', 'N/A')}"
+
+        
+        
+        # Draw a semi-transparent black rectangle behind the text
+        
+        # Draw the text
+        draw.text((20, 85), overlay_text, font=overlay_font, fill=TEXT_COLOR)
+
 
     # Convert the final image to RGB mode (JPEG doesn't support alpha channel)
     final_image = combined.convert("RGB")

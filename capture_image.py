@@ -134,7 +134,17 @@ def capture_image(config, iso, shutter_speed, daylight, logger=None):
 
         # Apply overlay and text to the captured image
         try:
-            overlay_image_with_text(file_name, output_image_path=file_name, quality=quality)
+# Create a dictionary to hold the data
+            overlay_data = {
+                "ISO": iso,
+                "Shutter": shutter_speed,
+                "Quality": quality,
+                "Compression": compression,
+                "Daylight": daylight,
+                "Config": camera_config['controls']
+            }
+            
+            overlay_image_with_text(file_name, output_image_path=file_name, quality=quality, overlay_data=overlay_data)
         except Exception as e:
             print(f"Error applying overlay: {e}")
             if logger:
