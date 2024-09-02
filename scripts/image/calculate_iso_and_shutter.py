@@ -1,11 +1,6 @@
 import os
 import yaml
 
-# Configuration parameters
-DAYLIGHT_THRESHOLD = 30  # Light level threshold for daylight mode (auto settings)
-NIGHT_THRESHOLD = 0      # Light level below which to use maximum ISO and slowest shutter speed
-SMOOTHING_START = 70       # Light level at which to start smoothing the transition to daylight settings
-
 def load_config(config_path):
     """
     Loads the configuration from a YAML file.
@@ -36,11 +31,15 @@ def calculate_iso_and_shutter(light_level):
     config_path = os.path.join(os.path.dirname(__file__), '../../config.yaml')
     config = load_config(config_path)
 
-    if light_level >= DAYLIGHT_THRESHOLD:
+    daylight_threshold = config['light_settings']['daylight_threshold']
+    night_threshold = config['light_settings']['night_threshold']
+    smoothing_start = config['light_settings']['smoothing_start']
+
+    if light_level >= daylight_threshold:
         # Daylight mode, use auto settings
         return "auto", "auto", True
 
-    elif light_level < NIGHT_THRESHOLD:
+    elif light_level < night_threshold:
         # Night mode, use maximum ISO and slowest shutter speed
         return config['camera_settings']['iso_night'], config['camera_settings']['shutter_speed_night'], False
 
@@ -49,7 +48,7 @@ def calculate_iso_and_shutter(light_level):
     shutter_range = config['camera_settings']['shutter_speed_night'] - config['camera_settings']['shutter_speed_day']
 
     # Calculate linear position between night and day based on light level
-    interpolation_factor = (light_level - NIGHT_THRESHOLD) / (DAYLIGHT_THRESHOLD - NIGHT_THRESHOLD)
+    interpolation_factor = (light_level - night_threshold) / (daylight_threshold - night_threshold)
     
     iso_value = config['camera_settings']['iso_day'] + (iso_range * (1 - interpolation_factor))
     shutter_value = config['camera_settings']['shutter_speed_day'] + (shutter_range * (1 - interpolation_factor))
@@ -59,9 +58,9 @@ def calculate_iso_and_shutter(light_level):
     shutter_value = int(max(config['camera_settings']['shutter_speed_day'], min(shutter_value, config['camera_settings']['shutter_speed_night'])))
 
     # Smooth the shutter speed transition as it approaches daylight (between SMOOTHING_START and DAYLIGHT_THRESHOLD light level)
-    if light_level > SMOOTHING_START:
-        transition_range = DAYLIGHT_THRESHOLD - SMOOTHING_START
-        relative_light_level = (light_level - SMOOTHING_START) / transition_range
+    if light_level > smoothing_start:
+        transition_range = daylight_threshold - smoothing_start
+        relative_light_level = (light_level - smoothing_start) / transition_range
         shutter_value = int((1 - relative_light_level) * shutter_value + relative_light_level * config['camera_settings']['shutter_speed_day'])
 
     return iso_value, shutter_value, False

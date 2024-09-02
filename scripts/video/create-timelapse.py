@@ -75,7 +75,7 @@ def create_timelapse(config, date=None, upload=True, debug=False, only_upload=Fa
 
     log_message(logger, f"Timelapse creation complete for {specified_date_str} and stored at {video_path}")
 
-def get_images_from_folder(folder, start_time=None, end_time=None, min_size_kb=196):
+def get_images_from_folder(folder, start_time=None, end_time=None, min_size_kb=30):
     min_size_bytes = min_size_kb * 1024  # Convert KB to bytes
 
     images = sorted([img for img in os.listdir(folder) if img.endswith('.jpg') and os.path.getsize(os.path.join(folder, img)) > min_size_bytes],
