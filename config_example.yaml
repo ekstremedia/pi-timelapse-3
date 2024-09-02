@@ -7,6 +7,7 @@ camera_settings:
   name: "Kringelen TEST"
   main_size: [3840, 2160]
   lores_size: [1000, 500]
+  measure_image_offset: 150 # Offset from the top of the image to measure light level
   awb_enable: False
   awb_mode: 'Daylight'
   colour_gains_day: [2.2, 1.9]  # Daytime gains
@@ -24,10 +25,15 @@ camera_settings:
   shutter_speed_night: 20000000  # In microseconds (1 second)
   display: 'main'
 
+light_settings:                # Variables for light evalutation
+  daylight_threshold: 50       # Light level threshold for daylight mode (auto settings)
+  night_threshold: 0           # Light level below which to use maximum ISO and slowest shutter speed
+  smoothing_start: 70          # Light level at which to start smoothing the transition to daylight settings
+
 image_output:
-  root_folder: '/var/www/html/images/'
-  folder_structure: '%Y/%m/%d/'
-  filename_prefix: 'kringelen_'
+  root_folder: '/var/www/html/images/'        # Root folder for images
+  folder_structure: '%Y/%m/%d/'               # 2023/06/15/
+  filename_prefix: 'kringelen_'               # Prefix for image filenames  
   status_file: '/var/www/html/status.jpg'
   image_extension: "jpg"
 

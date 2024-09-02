@@ -1,118 +1,23 @@
 import os
 import subprocess
-import json
 from datetime import datetime
 import time
 from picamera2 import Picamera2
-import libcamera
-import yaml
 from scripts.log.logging import setup_logger, log_message, setup_logging_directory
 from scripts.image.calculate_iso_and_shutter import calculate_iso_and_shutter
-
-# Import the overlay function
 from scripts.image.add_image_overlay import overlay_image_with_text
-
-def load_config(config_path):
-    """
-    Loads the configuration from a YAML file.
-
-    Parameters:
-        config_path (str): Path to the config.yaml file.
-
-    Returns:
-        dict: The configuration dictionary.
-    """
-    try:
-        with open(config_path, 'r') as file:
-            return yaml.safe_load(file)
-    except Exception as e:
-        print(f"Error loading config file: {e}")
-        return {}
-
-def load_values_from_file(file_path='temp/last_measurement.json'):
-    """
-    Loads the light level, ISO, and shutter speed from a JSON file.
-    
-    Parameters:
-        file_path (str): The file path to load the values from.
-    
-    Returns:
-        tuple: (light_level, iso, shutter_speed)
-    """
-    if os.path.exists(file_path):
-        try:
-            with open(file_path, 'r') as file:
-                data = json.load(file)
-            return data["light_level"], data["iso"], data["shutter_speed"]
-        except Exception as e:
-            print(f"Error loading values from file: {e}")
-            return None, None, None
-    else:
-        print(f"No previous measurement found at {file_path}")
-        return None, None, None
+from scripts.config.config_loader import load_config, load_values_from_file
+from scripts.image.configure_camera import configure_camera  # Import the configure_camera function
 
 def capture_image(config, iso, shutter_speed, daylight, logger=None):
-    """
-    Captures an image using the provided ISO and shutter speed settings.
-
-    Parameters:
-        config (dict): The configuration dictionary from config.yaml.
-        iso (int or str): The ISO setting for the capture.
-        shutter_speed (int or str): The shutter speed setting for the capture.
-        daylight (bool): Whether it's daylight or not.
-        logger (logging.Logger, optional): Logger instance for logging events.
-    """
     try:
         picam2 = Picamera2()
         
-        quality = config['camera_settings']['image_quality']
-        compression = config['camera_settings']['compress_level']
-        
-        picam2.options["quality"] = quality
-        picam2.options["compress_level"] = compression
+        picam2.options["quality"] = config['camera_settings']['image_quality']
+        picam2.options["compress_level"] = config['camera_settings']['compress_level']
 
-        # Determine focus mode and lens position based on config
-        focus_mode = libcamera.controls.AfModeEnum.Manual if config['camera_settings']['focus_mode'] == 'manual' else libcamera.controls.AfModeEnum.Auto
-        lens_position = config['camera_settings']['lens_position'] if config['camera_settings']['focus_mode'] == 'manual' else None
-
-        if daylight:
-            # Daytime configuration
-            if config['camera_settings']['hdr']:
-                os.system("v4l2-ctl --set-ctrl wide_dynamic_range=1 -d /dev/v4l-subdev0")
-            else:
-                os.system("v4l2-ctl --set-ctrl wide_dynamic_range=0 -d /dev/v4l-subdev0")            
-            camera_config = picam2.create_still_configuration(
-                main={"size": tuple(config['camera_settings']['main_size'])},
-                lores={"size": tuple(config['camera_settings']['lores_size'])},
-                display=config['camera_settings']['display'],
-                controls={
-                    "AwbEnable": config['camera_settings']['awb_enable'],
-                    "AwbMode": getattr(libcamera.controls.AwbModeEnum, config['camera_settings']['awb_mode']),
-                    "AfMode": focus_mode,
-                    "LensPosition": lens_position,
-                    "ColourGains": tuple(config['camera_settings']['colour_gains_day']),
-                    "AnalogueGain": 1  # Default gain for daytime
-                }
-            )
-        else:
-            # Nighttime configuration
-            os.system("v4l2-ctl --set-ctrl wide_dynamic_range=0 -d /dev/v4l-subdev0") 
-            camera_config = picam2.create_still_configuration(
-                main={"size": tuple(config['camera_settings']['main_size'])},
-                lores={"size": tuple(config['camera_settings']['lores_size'])},
-                display=config['camera_settings']['display'],
-                controls={
-                    "AwbEnable": config['camera_settings']['awb_enable'],
-                    "AwbMode": getattr(libcamera.controls.AwbModeEnum, config['camera_settings']['awb_mode']),
-                    "AfMode": focus_mode,
-                    "LensPosition": lens_position,
-                    "ColourGains": tuple(config['camera_settings']['colour_gains_night']),
-                    "ExposureTime": int(shutter_speed),  # Only set at night
-                    "AnalogueGain": round(iso)  # Only set at night
-                }
-            )
-
-        picam2.configure(camera_config)
+        camera_config = configure_camera(picam2, config, daylight, iso, shutter_speed, logger)
+        picam2.configure(camera_config)  # type: ignore
 
         # Start the camera and capture the image
         time.sleep(2)  # Allow camera to adjust
@@ -122,29 +27,27 @@ def capture_image(config, iso, shutter_speed, daylight, logger=None):
         dir_name = os.path.join(config['image_output']['root_folder'], now.strftime(config['image_output']['folder_structure']))
         os.makedirs(dir_name, exist_ok=True)
         file_name = os.path.join(dir_name, f"{config['image_output']['filename_prefix']}{now.strftime('%Y_%m_%d_%H_%M_%S')}.{config['image_output']['image_extension']}")
-        
+
         picam2.capture_file(file_name)
         picam2.stop()
 
         # Log the capture
-        log_entry = f"Captured image {file_name} with settings: ISO={iso}, Shutter={shutter_speed}, Quality={quality}, Compression={compression}, Daylight={daylight}, Config={camera_config['controls']}"
+        log_entry = f"Captured image {file_name} with settings: ISO={iso}, Shutter={shutter_speed}, Quality={picam2.options['quality']}, Compression={picam2.options['compress_level']}, Daylight={daylight}, Config={camera_config['controls']}"
         print(log_entry)
         if logger:
             log_message(logger, log_entry)
 
         # Apply overlay and text to the captured image
         try:
-# Create a dictionary to hold the data
             overlay_data = {
                 "ISO": iso,
                 "Shutter": shutter_speed,
-                "Quality": quality,
-                "Compression": compression,
+                "Quality": picam2.options['quality'],
+                "Compression": picam2.options['compress_level'],
                 "Daylight": daylight,
                 "Config": camera_config['controls']
             }
-            
-            overlay_image_with_text(file_name, output_image_path=file_name, quality=quality, overlay_data=overlay_data)
+            overlay_image_with_text(file_name, output_image_path=file_name, quality=picam2.options['quality'], overlay_data=overlay_data)
         except Exception as e:
             print(f"Error applying overlay: {e}")
             if logger:
@@ -156,7 +59,6 @@ def capture_image(config, iso, shutter_speed, daylight, logger=None):
             if os.path.islink(symlink_path) or os.path.exists(symlink_path):
                 os.remove(symlink_path)
             os.symlink(file_name, symlink_path)
-            print(f"Symlink updated: {symlink_path} -> {file_name}")
 
             if logger:
                 log_message(logger, f"Symlink updated: {symlink_path} -> {file_name}")
@@ -191,7 +93,7 @@ if __name__ == "__main__":
 
         if debug_mode and debug_light_level is not None:
             light_level = debug_light_level
-            iso, shutter_speed, _ = calculate_iso_and_shutter(light_level, config)
+            iso, shutter_speed, _ = calculate_iso_and_shutter(light_level, config) # type: ignore
             log_message(logger, f"Debug mode enabled. Overriding light level to {light_level}")
         else:
             # Run the light evaluation script
@@ -211,3 +113,4 @@ if __name__ == "__main__":
         print(f"Fatal error in main execution: {e}")
         if logger:
             log_message(logger, f"Fatal error in main execution: {e}")
+ 

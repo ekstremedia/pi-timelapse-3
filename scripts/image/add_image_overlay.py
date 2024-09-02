@@ -127,7 +127,7 @@ def overlay_image_with_text(input_image_path, output_image_path=None, text=None,
         output_image_path = input_image_path
 
     final_image.save(output_image_path, "JPEG", quality=quality, optimize=True)
-    print(f"Image saved to {output_image_path}")
+    print(f"Overlay added and saved to {output_image_path}")
 
 def test_overlay_image(input_image_path, output_image_path):
     """
