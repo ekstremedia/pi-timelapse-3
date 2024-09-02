@@ -8,6 +8,7 @@ from scripts.image.calculate_iso_and_shutter import calculate_iso_and_shutter
 from scripts.image.add_image_overlay import overlay_image_with_text
 from scripts.config.config_loader import load_config, load_values_from_file
 from scripts.image.configure_camera import configure_camera  # Import the configure_camera function
+from scripts.image.set_hdr_status import get_current_hdr_state  # Import function to get HDR state
 
 def capture_image(config, iso, shutter_speed, daylight, logger=None):
     try:
@@ -31,8 +32,11 @@ def capture_image(config, iso, shutter_speed, daylight, logger=None):
         picam2.capture_file(file_name)
         picam2.stop()
 
+        # Get the HDR state
+        hdr_state = get_current_hdr_state()
+
         # Log the capture
-        log_entry = f"Captured image {file_name} with settings: ISO={iso}, Shutter={shutter_speed}, Quality={picam2.options['quality']}, Compression={picam2.options['compress_level']}, Daylight={daylight}, Config={camera_config['controls']}"
+        log_entry = f"Captured image {file_name} with settings: ISO={iso}, Shutter={shutter_speed}, Quality={picam2.options['quality']}, Compression={picam2.options['compress_level']}, Daylight={daylight}, HDR={hdr_state}, Config={camera_config['controls']}"
         print(log_entry)
         if logger:
             log_message(logger, log_entry)
@@ -45,6 +49,7 @@ def capture_image(config, iso, shutter_speed, daylight, logger=None):
                 "Quality": picam2.options['quality'],
                 "Compression": picam2.options['compress_level'],
                 "Daylight": daylight,
+                "HDR": hdr_state,  # Include HDR state
                 "Config": camera_config['controls']
             }
             overlay_image_with_text(file_name, output_image_path=file_name, quality=picam2.options['quality'], overlay_data=overlay_data)

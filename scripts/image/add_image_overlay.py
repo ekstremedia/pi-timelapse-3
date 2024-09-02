@@ -1,3 +1,5 @@
+# scripts/image/add_image_overlay.py
+
 import json
 from PIL import Image, ImageDraw, ImageFont
 import os
@@ -95,29 +97,19 @@ def overlay_image_with_text(input_image_path, output_image_path=None, text=None,
     date_position = ((base_image.width - date_bbox[2]) // 2, text_position[1] + text_bbox[3] + 10)  # 10 pixels below the camera name
     draw.text(date_position, full_date, font=datefont, fill=TEXT_COLOR)
 
-    # Draw a rectangle behind the overlay text for better visibility (for debugging)
-    # overlay_data = {
-    #     "ISO": "100",
-    #     "Shutter": "1/125",
-    #     "Quality": "High",
-    #     "Compression": "Low",
-    #     "Daylight": "True"
-    # }    
-    
     if overlay_data:
         light_level = load_light_level()
         overlay_font = ImageFont.truetype(FONT_PATH, 30)
-        overlay_text = f"ISO: {overlay_data.get('ISO', 'N/A')} Shutter: {overlay_data.get('Shutter', 'N/A')} "  \
-                    f"Light: {light_level} " \
-                    f"Daylight: {overlay_data.get('Daylight', 'N/A')}"
+        overlay_text = (
+            f"ISO: {overlay_data.get('ISO', 'N/A')}, "
+            f"Shutter: {overlay_data.get('Shutter', 'N/A')}, "
+            f"Light: {light_level}, "
+            f"Daylight: {overlay_data.get('Daylight', 'N/A')}, "
+            f"HDR: {'On' if overlay_data.get('HDR') else 'Off'}"  # Include HDR state
+        )
 
-        
-        
-        # Draw a semi-transparent black rectangle behind the text
-        
         # Draw the text
         draw.text((20, 85), overlay_text, font=overlay_font, fill=TEXT_COLOR)
-
 
     # Convert the final image to RGB mode (JPEG doesn't support alpha channel)
     final_image = combined.convert("RGB")
@@ -128,6 +120,7 @@ def overlay_image_with_text(input_image_path, output_image_path=None, text=None,
 
     final_image.save(output_image_path, "JPEG", quality=quality, optimize=True)
     print(f"Overlay added and saved to {output_image_path}")
+
 
 def test_overlay_image(input_image_path, output_image_path):
     """
