@@ -7,7 +7,6 @@ camera_settings:
   name: "Kringelen TEST"
   main_size: [3840, 2160]
   lores_size: [1000, 500]
-  measure_image_offset: 150 # Offset from the top of the image to measure light level
   awb_enable: False
   awb_mode: 'Daylight'
   colour_gains_day: [2.2, 1.9]  # Daytime gains
@@ -15,8 +14,8 @@ camera_settings:
   interval: 30  # Interval in seconds
   focus_mode: 'manual'
   lens_position: 0.0  # 0.0 = infinity, 1 sharp, 10 unsharp
-  hdr: true
-  image_quality: 65 # JPEG quality level, where 0 is the worst quality and 95 is best.
+  hdr: false
+  image_quality: 85 # JPEG quality level, where 0 is the worst quality and 95 is best.
   compress_level: 6 # PNG compression level, where 0 gives no compression, 1 is the fastest that actually does any compression, and 9 is the slowest.
   light_threshold: 50  # Adjust as needed for day/night transition
   iso_day: 1
@@ -24,6 +23,7 @@ camera_settings:
   shutter_speed_day: 0  # 0 means auto
   shutter_speed_night: 20000000  # In microseconds (1 second)
   display: 'main'
+  exposure_value: 1 # Positive values for brighter exposure, negative for darker. Set positive if image is dark.
 
 light_settings:                # Variables for light evalutation
   daylight_threshold: 50       # Light level threshold for daylight mode (auto settings)
