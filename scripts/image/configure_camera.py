@@ -22,6 +22,12 @@ def configure_camera(picam2, config, daylight, iso=None, shutter_speed=None, log
             controls["ExposureTime"] = int(shutter_speed)  # Only set at night
             controls["AnalogueGain"] = round(iso)  # Only set at night
 
+
+    # Apply exposure compensation for daylight to brighten images if exposure_value is set in config
+    exposure_value = config['camera_settings'].get('exposure_value')  # Safely fetch the exposure_value or None if not set
+    if daylight and exposure_value is not None:
+        controls["ExposureValue"] = exposure_value  # Apply exposure compensation
+        
     set_hdr_state(daylight and config['camera_settings']['hdr'], logger)  # Set HDR based on daylight and config
 
     return picam2.create_still_configuration(
