@@ -19,8 +19,11 @@ def configure_camera(picam2, config, daylight, iso=None, shutter_speed=None, log
     # Add night-specific controls
     if not daylight:
         if (shutter_speed is not None) and (iso is not None):
+            # Disable automatic exposure control and gain control by setting manual gain
             controls["ExposureTime"] = int(shutter_speed)  # Only set at night
-            controls["AnalogueGain"] = round(iso)  # Only set at night
+            controls["AwbEnable"] = False  # Only set at night
+            controls["AeEnable"] = False # Only set at night
+            controls["AnalogueGain"] = iso or 1.0  # Apply the provided gain or default to 1.0
 
 
     # Apply exposure compensation for daylight to brighten images if exposure_value is set in config
