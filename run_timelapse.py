@@ -32,13 +32,19 @@ if __name__ == "__main__":
     interval = config['camera_settings']['interval']
     
     while True:
-        # Start capturing images at specified intervals
+        # Start the timer to measure the time taken for capturing the image
+        start_time = time.time()
         log_message(logger, f"Starting a new capture cycle.")
+        
         try:
             script_path = os.path.join(os.path.dirname(__file__), 'capture_image.py')
             subprocess.run(['python3', script_path], check=True)
         except subprocess.CalledProcessError as e:
             log_message(logger, f"Error during image capture: {e}")
         
-        log_message(logger, f"Sleeping for {interval} seconds before next capture.")
-        time.sleep(interval)
+        # Calculate the time taken to capture the image
+        capture_duration = time.time() - start_time
+        remaining_sleep = max(0, interval - capture_duration)  # Ensure no negative sleep times
+
+        log_message(logger, f"Capture took {capture_duration:.2f} seconds. Sleeping for {remaining_sleep:.2f} seconds before next capture.")
+        time.sleep(remaining_sleep)
