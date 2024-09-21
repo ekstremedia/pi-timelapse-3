@@ -116,11 +116,11 @@ def overlay_image_with_text(input_image_path, output_image_path=None, text=None,
                 )
             overlay_text_right += (
                 f"Lux: {metadata['Lux']}, "
-                f"Exposuretime: {metadata['ExposureTime']}, "
                 f"AGain: {metadata['AnalogueGain']}, "
                 f"DGain: {metadata['DigitalGain']}"
             )
             overlay_text_right_line_2 = (
+                f"Exposuretime: {metadata['ExposureTime']}, "
                 f"LensPos: {metadata['LensPosition']}, "
                 f"SensorTemp: {metadata['SensorTemperature']}"
             )
