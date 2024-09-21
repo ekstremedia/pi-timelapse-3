@@ -51,6 +51,8 @@ video_output:
 overlay:
   enabled: False
 
+database:
+  storeLux: true
 
 logging:
     capture_image: True

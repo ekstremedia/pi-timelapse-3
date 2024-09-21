@@ -1,8 +1,15 @@
 import subprocess
+import sys
 import os
 import json
 from light_meter import calculate_light_level
 from calculate_iso_and_shutter import calculate_iso_and_shutter
+from datetime import datetime
+
+# Add the root directory to sys.path
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../')))
+from scripts.database.database_store import insert_evaluation  # Correct function name to match your database_store.py
+
 
 def capture_light_valuation_image():
     """
@@ -11,6 +18,7 @@ def capture_light_valuation_image():
     script_path = os.path.join(os.path.dirname(__file__), 'capture_light_valuation_image.py')
     subprocess.run(['python3', script_path], check=True)
     print("Image capture completed.")
+
 
 def evaluate_light_level(image_path):
     """
@@ -25,6 +33,7 @@ def evaluate_light_level(image_path):
     light_level = calculate_light_level(image_path)
     print(f"Light level for {image_path}: {light_level:.1f}")
     return light_level
+
 
 def save_values_to_file(light_level, iso, shutter_speed, file_path='temp/last_measurement.json'):
     """
@@ -45,6 +54,7 @@ def save_values_to_file(light_level, iso, shutter_speed, file_path='temp/last_me
         json.dump(data, file)
     print(f"Values saved to {file_path}")
 
+
 def load_values_from_file(file_path='temp/last_measurement.json'):
     """
     Loads the light level, ISO, and shutter speed from a JSON file.
@@ -63,6 +73,7 @@ def load_values_from_file(file_path='temp/last_measurement.json'):
         print(f"No previous measurement found at {file_path}")
         return None, None, None
 
+
 if __name__ == "__main__":
     # Capture the light valuation image
     capture_light_valuation_image()
@@ -73,8 +84,20 @@ if __name__ == "__main__":
     # Evaluate the light level of the captured image
     light_level = evaluate_light_level(image_path)
     
-    # Calculate the ISO and shutter speed based on the light level
-    iso, shutter_speed, _ = calculate_iso_and_shutter(light_level)
-    
+    # Load the previously stored evaluation values (from the JSON file)
+    metadata_file_path = os.path.join('data', 'evaluation_measure.json')
+    with open(metadata_file_path, 'r') as f:
+        evaluated_values = json.load(f)
+
+    # Get the relevant metadata (Lux and ExposureTime)
+    evaluated_lux = evaluated_values.get("Lux", None)  # If not found, fallback to calculated light level
+    evaluated_exposure_time = evaluated_values.get("ExposureTime", None)
+
+    # Get the current datetime
+    capture_datetime = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+    # Store Lux, ExposureTime, and datetime in the database
+    insert_evaluation(evaluated_lux=evaluated_lux, evaluated_exposure_time=evaluated_exposure_time)
+
     # Save the values to a JSON file
-    save_values_to_file(light_level, iso, shutter_speed)
+    save_values_to_file(light_level, "auto", "auto")

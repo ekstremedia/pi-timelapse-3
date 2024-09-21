@@ -6,3 +6,4 @@ overlay/output.jpg
 **/__pycache__/
 config.yaml
 .vscode/settings.json
+database/lux_data.db

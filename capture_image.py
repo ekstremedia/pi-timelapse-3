@@ -10,6 +10,7 @@ from scripts.image.add_image_overlay import overlay_image_with_text
 from scripts.config.config_loader import load_config, load_values_from_file
 from scripts.image.configure_camera import configure_camera  # Import the configure_camera function
 from scripts.image.set_hdr_status import get_current_hdr_state  # Import function to get HDR state
+from scripts.database.database_store import insert_evaluation  # Correct function name to match your database_store.py
 METADATA_FILE = os.path.join(os.path.dirname(__file__), 'data/capture_metadata.json')
 
 
@@ -101,7 +102,8 @@ def capture_image(config, iso, shutter_speed, daylight, logger=None):
         hdr_state = get_current_hdr_state()
 
         log_colored_capture(file_name, iso, shutter_speed, picam2.options['quality'], picam2.options['compress_level'], daylight, hdr_state, camera_config, metadataForPrint)
-
+        if config['database']['store_data'] == True:
+            insert_evaluation(lux=metadataForPrint['Lux'], exposure_time=metadataForPrint['ExposureTime'], update_latest=True)
         # Apply overlay and text to the captured image
         try:
             overlay_data = {
