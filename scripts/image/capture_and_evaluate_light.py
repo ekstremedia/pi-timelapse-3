@@ -96,8 +96,10 @@ if __name__ == "__main__":
     # Get the current datetime
     capture_datetime = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
+    iso, shutter_speed, _ = calculate_iso_and_shutter(light_level)
+
     # Store Lux, ExposureTime, and datetime in the database
     insert_evaluation(evaluated_lux=evaluated_lux, evaluated_exposure_time=evaluated_exposure_time)
 
     # Save the values to a JSON file
-    save_values_to_file(light_level, "auto", "auto")
+    save_values_to_file(light_level, iso, shutter_speed)
