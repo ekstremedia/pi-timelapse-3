@@ -89,7 +89,6 @@ def capture_image(config, iso, shutter_speed, daylight, logger=None):
             "FrameDuration": metadata['FrameDuration'],
             "LensPosition": metadata['LensPosition'],
             "SensorTemperature": metadata['SensorTemperature'],
-            "FocusFoM": metadata['FocusFoM'],
             "AeLocked": metadata['AeLocked'],
             "AfState": metadata['AfState'],
         }

@@ -4,7 +4,6 @@ import os
 import json
 from light_meter import calculate_light_level
 from calculate_iso_and_shutter import calculate_iso_and_shutter
-from datetime import datetime
 
 # Add the root directory to sys.path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../')))
@@ -92,9 +91,6 @@ if __name__ == "__main__":
     # Get the relevant metadata (Lux and ExposureTime)
     evaluated_lux = evaluated_values.get("Lux", None)  # If not found, fallback to calculated light level
     evaluated_exposure_time = evaluated_values.get("ExposureTime", None)
-
-    # Get the current datetime
-    capture_datetime = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
     iso, shutter_speed, _ = calculate_iso_and_shutter(light_level)
     # Save the values to a JSON file
