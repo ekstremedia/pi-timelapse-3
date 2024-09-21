@@ -25,7 +25,7 @@ def load_lux_value():
         try:
             with open(metadata_path, 'r') as f:
                 data = json.load(f)
-                return round(data.get("Lux", None), 2)
+                return round(data.get("Lux", None), 1)
         except Exception as e:
             print(f"Error loading Lux value from evaluation_measure.json: {e}")
             return None
