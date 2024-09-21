@@ -62,7 +62,7 @@ def capture_light_valuation_image():
     # Initialize the camera with the lores size
     picam2 = Picamera2()
     camera_config = picam2.create_still_configuration(
-        main={"size": tuple(config['camera_settings']['lores_size'])},  # Set main to lores_size
+        main={"size": tuple(config['camera_settings']['main_size'])},  # Set main to lores_size
         lores={"size": tuple(config['camera_settings']['lores_size'])},
         controls={"AfMode": libcamera.controls.AfModeEnum.Manual}  # Assuming manual focus
     )
