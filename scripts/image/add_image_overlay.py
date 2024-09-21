@@ -51,7 +51,7 @@ def load_camera_name(config_path=CONFIG_PATH):
         config = yaml.safe_load(file)
     return config.get('camera_settings', {}).get('name', "Camera Name")
 
-def overlay_image_with_text(input_image_path, output_image_path=None, text=None, quality=QUALITY, overlay_data=None):
+def overlay_image_with_text(input_image_path, output_image_path=None, text=None, quality=QUALITY, overlay_data=None, metadata=None, evlux=None):
     """
     Overlays an image with an overlay image, adds the camera name, and the full date in Norwegian.
 
@@ -104,13 +104,33 @@ def overlay_image_with_text(input_image_path, output_image_path=None, text=None,
             f"ISO: {overlay_data.get('ISO', 'N/A')}, "
             f"Shutter: {overlay_data.get('Shutter', 'N/A')}, "
             f"Light: {light_level}, "
-            f"Daylight: {overlay_data.get('Daylight', 'N/A')}, "
+            f"Day: {overlay_data.get('Daylight', 'N/A')}, "
             f"HDR: {'On' if overlay_data.get('HDR') else 'Off'}"  # Include HDR state
         )
+        if metadata is not None:
+            
+            overlay_text_right = ""
+            if evlux is not None:
+                overlay_text_right += (
+                    f"Evlux: {evlux}, "
+                )
+            overlay_text_right += (
+                f"Lux: {metadata['Lux']}, "
+                f"Exposuretime: {metadata['ExposureTime']}, "
+                f"AGain: {metadata['AnalogueGain']}, "
+                f"DGain: {metadata['DigitalGain']}"
+            )
+            overlay_text_right_line_2 = (
+                f"Exposuretime: {metadata['ExposureTime']}, "
+                f"LensPosition: {metadata['LensPosition']}, "
+                f"SensorTemp: {metadata['SensorTemperature']}"
+            )
+            draw.text((2450, 25), overlay_text_right, font=overlay_font, fill=TEXT_COLOR)
+            draw.text((2450, 80), overlay_text_right_line_2, font=overlay_font, fill=TEXT_COLOR)
 
         # Draw the text
         draw.text((20, 85), overlay_text, font=overlay_font, fill=TEXT_COLOR)
-
+        
     # Convert the final image to RGB mode (JPEG doesn't support alpha channel)
     final_image = combined.convert("RGB")
 
@@ -119,7 +139,7 @@ def overlay_image_with_text(input_image_path, output_image_path=None, text=None,
         output_image_path = input_image_path
 
     final_image.save(output_image_path, "JPEG", quality=quality, optimize=True)
-    print(f"Overlay added and saved to {output_image_path}")
+    # print(f"Overlay added and saved to {output_image_path}")
 
 
 def test_overlay_image(input_image_path, output_image_path):
