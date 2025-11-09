@@ -1,3 +1,5 @@
+# This is now archived. Go here for the new version: https://github.com/ekstremedia/raspilapse
+
 Project Overview
 This project is designed to automate the process of capturing images with a Raspberry Pi camera, adjusting camera settings based on ambient light conditions, and saving the images in an organized directory structure. The system adjusts camera settings dynamically, switching between daytime and nighttime configurations based on light measurements, ensuring optimal image quality throughout the day.
 
